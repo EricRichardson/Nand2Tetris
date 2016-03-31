@@ -1,5 +1,5 @@
 # Nand2Tetris
-I enrolled for Nand2Tetris at coursera.com (https://www.coursera.org/learn/build-a-computer/)
+I enrolled for Nand2Tetris at coursera.org (https://www.coursera.org/learn/build-a-computer/)
 
 I figured I might as well push my files to github. 
 
