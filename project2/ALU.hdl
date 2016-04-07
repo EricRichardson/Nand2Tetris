@@ -1,0 +1,73 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/ALU.hdl
+
+/**
+ * The ALU (Arithmetic Logic Unit).
+ * Computes one of the following functions:
+ * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs,
+ * according to 6 input bits denoted zx,nx,zy,ny,f,no.
+ * In addition, the ALU computes two 1-bit outputs:
+ * if the ALU output == 0, zr is set to 1; otherwise zr is set to 0;
+ * if the ALU output < 0, ng is set to 1; otherwise ng is set to 0.
+ */
+
+// Implementation: the ALU logic manipulates the x and y inputs
+// and operates on the resulting values, as follows:
+// if (zx == 1) set x = 0        // 16-bit constant
+// if (nx == 1) set x = !x       // bitwise not
+// if (zy == 1) set y = 0        // 16-bit constant
+// if (ny == 1) set y = !y       // bitwise not
+// if (f == 1)  set out = x + y  // integer 2's complement addition
+// if (f == 0)  set out = x & y  // bitwise and
+// if (no == 1) set out = !out   // bitwise not
+// if (out == 0) set zr = 1
+// if (out < 0) set ng = 1
+
+CHIP ALU {
+    IN
+        x[16], y[16],  // 16-bit inputs
+        zx, // zero the x input?
+        nx, // negate the x input?
+        zy, // zero the y input?
+        ny, // negate the y input?
+        f,  // compute out = x + y (if 1) or x & y (if 0)
+        no; // negate the out output?
+
+    OUT
+        out[16], // 16-bit output
+        zr, // 1 if (out == 0), 0 otherwise
+        ng; // 1 if (out < 0),  0 otherwise
+
+    PARTS:
+   // Put you code here:
+   Mux16 (a=x, b=false, sel=zx, out=zerox);
+   Mux16 (a=y, b=false, sel=zy, out=zeroy);
+   Not16 (in=zerox, out=notx);
+   Not16 (in=zeroy, out=noty);
+   Mux16 (a=zerox, b=notx, sel=nx, out=precalcx);
+   Mux16 (a=zeroy, b=noty, sel=ny, out=precalcy);
+   And16 (a=precalcx, b=precalcy, out=anded);
+   Add16 (a=precalcx, b=precalcy, out=added);
+   Mux16 (a=anded, b=added, sel=f, out=calced);
+   Not16 (in=calced, out=notcalced);
+   Mux16 (a=calced, b=notcalced, sel=no, out=out, out[15]=ng, out[0]=toz1, out[1]=toz2, out[2]=toz3, out[3]=toz4, out[4]=toz5, out[5]=toz6, out[6]=toz7, out[7]=toz8, out[8]=toz9, out[9]=toz10, out[10]=toz11, out[11]=toz12, out[12]=toz13, out[13]=toz14, out[14]=toz15, out[15]=toz16);
+   Or (a=toz1, b=toz2, out=iszero1);
+   Or (a=toz3, b=toz4, out=iszero2);
+   Or (a=toz5, b=toz6, out=iszero3);
+   Or (a=toz7, b=toz8, out=iszero4);
+   Or (a=toz9, b=toz10, out=iszero5);
+   Or (a=toz11, b=toz12, out=iszero6);
+   Or (a=toz13, b=toz14, out=iszero7);
+   Or (a=toz15, b=toz16, out=iszero8);
+   Or (a=iszero1, b=iszero2, out=r2iszero1);
+   Or (a=iszero3, b=iszero4, out=r2iszero2);
+   Or (a=iszero5, b=iszero6, out=r2iszero3);
+   Or (a=iszero7, b=iszero8, out=r2iszero4);
+   Or (a=r2iszero1, b=r2iszero2, out=r3iszero1);
+   Or (a=r2iszero3, b=r2iszero4, out=r3iszero2);
+   Or (a=r3iszero1, b=r3iszero2, out=notzr);
+   Not (in=notzr, out=zr);
+}
