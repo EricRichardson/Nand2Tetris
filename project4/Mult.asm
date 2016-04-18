@@ -9,14 +9,18 @@
 //Initialize location
 @R2
 M=0
-//Set value to add to R3
+//Check for zeros
 @R0
 D=M
-@R3
-M=D
+@END
+D;JEQ
+@R1
+D=M
+@END
+D;JEQ
 //Multiplication loop
 (LOOP)
-@R3
+@R0
 D=M
 @R2
 M=M+D
