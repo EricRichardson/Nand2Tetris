@@ -98,7 +98,7 @@ end
 
 class SymbolTable
   attr_accessor :symbols
-  @symbols = Hash.new
+
   def initialize
     @symbols = { '@SP' => '@0', '@LCL' => '@1', '@ARG' => '@2', '@THIS' => '@3', '@THAT' => '@4',
     '@R0' => '@0', '@R1' => '@1', '@R2' => '@2', '@R3' => '@3', '@R4' => '@4', '@R5' => '@5', '@R6' => '@6',
@@ -128,8 +128,7 @@ rom_address = 0
 ram_address = 16
 symbols = SymbolTable.new
 assembler = Assembler.new
-puts "What file do you want assembled?"
-input_name = gets.chomp
+input_name = ARGV.first
 output_name = input_name.gsub(".asm", ".hack")
 input = assembler.initializer(input_name)
 output = File.open("#{output_name}", "w")
@@ -137,7 +136,7 @@ input.rewind
 
 File.readlines(input).each do |line| # First pass
   if assembler.command_type(line) == "L_CMD"
-    label = "@#{line.gsub("\(", '').gsub("\)", '').strip}"
+   label = "@#{line.gsub("\(", '').gsub("\)", '').strip}"
    symbols.add_symbol(label, rom_address) unless symbols.contains?(label)
   else
     rom_address += 1
@@ -164,14 +163,8 @@ temp.rewind
 
 File.readlines(temp).each do |line| # Main pass
   if assembler.command_type(line) == "A_CMD"
-    i = 0
-    zeros = String.new
-    length = assembler.dec_to_bin(line.gsub('@', '')).length
-    while(i + length < 16) do
-      zeros << "0"
-      i += 1
-    end
-    output << zeros + assembler.dec_to_bin(line.gsub('@', '')) + "\n"
+    length = 16 - assembler.dec_to_bin(line.gsub('@', '')).length
+    output << "0" * length + assembler.dec_to_bin(line.gsub('@', '')) + "\n"
   else # C_CMD
     c = assembler.comp(line)
     d = assembler.dest(line)
